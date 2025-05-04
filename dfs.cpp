@@ -111,109 +111,78 @@ int main() {
 
 
 
-// Design and implement Parallel DEPTH First Search based on existing algorithms using
-// OpenMP. Use a Tree or an undirected graph for BFS.
-
 // #include <iostream>
 // #include <vector>
 // #include <stack>
 // #include <omp.h>
-// #include <chrono>
+
 // using namespace std;
 
-// class Graph {
-// public:
-//     int V;
-//     vector<vector<int>> adj;
-//     vector<bool> visited;
+// void parallelDFS(const vector<vector<int>>& graph, int startNode) {
+//     int n = graph.size();
+//     vector<bool> visited(n, false);
+//     stack<int> s;
 
-//     Graph(int v) : V(v) {
-//         adj.resize(V);
-//     }
+//     s.push(startNode);
 
-//     void addEdge(int u, int v) {
-//         adj[u].push_back(v);
-//         adj[v].push_back(u);
-//     }
+//     cout << "DFS traversal starting from node " << startNode << ": ";
 
-//     void resetVisited() {
-//         visited.assign(V, false);
-//     }
+//     while (!s.empty()) {
+//         int node;
 
-//     void dfs(int start) {
-//         stack<int> s;
-//         s.push(start);
-//         visited[start] = true;
-
-//         while (!s.empty()) {
-//             int curr = s.top(); s.pop();
-//             cout << curr << " ";
-
-//             for (int i = adj[curr].size() - 1; i >= 0; i--) {
-//                 int neigh = adj[curr][i];
-                
-//                 if (!visited[neigh]) {
-//                     visited[neigh] = true;
-//                     s.push(neigh);
-//                 }
+//         #pragma omp critical
+//         {
+//             if (!s.empty()) {
+//                 node = s.top();
+//                 s.pop();
 //             }
 //         }
-//     }
 
-//     void parallel_dfs(int start) {
-//         stack<int> s;
-//         s.push(start);
-//         visited[start] = true;
+//         if (!visited[node]) {
+//             visited[node] = true;
+//             cout << node << " ";
 
-//         while (!s.empty()) {
-//             int curr = s.top(); s.pop();
-//             cout << curr << " ";
-
+//             // Push neighbors onto stack in parallel
 //             #pragma omp parallel for
-//             for (int i = adj[curr].size() - 1; i >= 0; i--) {
-//                 int neigh = adj[curr][i];
-//                 if (!visited[neigh]) 
-//                 {
+//             for (int i = 0; i < graph[node].size(); i++) {
+//                 int neighbor = graph[node][i];
+
+//                 if (!visited[neighbor]) {
 //                     #pragma omp critical
 //                     {
-//                         if (!visited[neigh]) {
-//                             visited[neigh] = true;
-//                             s.push(neigh);
-//                         }
+//                         s.push(neighbor);
 //                     }
 //                 }
 //             }
 //         }
 //     }
-// };
+
+//     cout << endl;
+// }
 
 // int main() {
-//     int v, e;
-//     cout << "Vertices and Edges: ";
-//     cin >> v >> e;
+//     int nodes, edges;
+//     cout << "Enter number of nodes: ";
+//     cin >> nodes;
 
-//     Graph g(v);
-//     cout << "Enter edges (u v):\n";
-//     for (int i = 0; i < e; i++) {
+//     vector<vector<int>> graph(nodes);
+
+//     cout << "Enter number of edges: ";
+//     cin >> edges;
+
+//     cout << "Enter " << edges << " edges (u v):" << endl;
+//     for (int i = 0; i < edges; ++i) {
 //         int u, v;
 //         cin >> u >> v;
-//         g.addEdge(u, v);
+//         graph[u].push_back(v);
+//         graph[v].push_back(u);  // undirected graph
 //     }
 
-//     g.resetVisited();
-//     cout << "Serial DFS: ";
-//     auto start = chrono::high_resolution_clock::now();
-//     g.dfs(0);
-//     auto end = chrono::high_resolution_clock::now();
-//     cout << "\nTime: " << chrono::duration_cast<chrono::microseconds>(end - start).count() << " microseconds\n";
+//     int startNode;
+//     cout << "Enter starting node for DFS: ";
+//     cin >> startNode;
 
-//     g.resetVisited();
-//     cout << "Parallel DFS: ";
-//     start = chrono::high_resolution_clock::now();
-//     g.parallel_dfs(0);
-//     end = chrono::high_resolution_clock::now();
-//     cout << "\nTime: " << chrono::duration_cast<chrono::microseconds>(end - start).count() << " microseconds\n";
+//     parallelDFS(graph, startNode);
 
 //     return 0;
 // }
-
